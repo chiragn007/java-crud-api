@@ -14,10 +14,10 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 
 public class OpenApiBuilder {
-	private OpenApiDefinition openapi;
-	private DatabaseReflection reflection;
-	private LinkedHashMap<String,String> operations;
-	private LinkedHashMap<String,LinkedHashMap<String,String>> types;
+    private OpenApiDefinition openapi;
+    private DatabaseReflection reflection;
+    private LinkedHashMap<String,String> operations;
+    private LinkedHashMap<String,LinkedHashMap<String,String>> types;
 
     private LinkedHashMap<String,String> createType(String type, String format) {
         LinkedHashMap<String,String> item = new LinkedHashMap<>();
@@ -28,15 +28,15 @@ public class OpenApiBuilder {
         return item;
     }
 
-	public OpenApiBuilder(DatabaseReflection reflection, OpenApiDefinition base)
-	{
-		operations = new LinkedHashMap<>();
-		operations.put("list", "getTable");
-		operations.put("create", "post");
-		operations.put("read", "getTable");
-		operations.put("update", "put");
-		operations.put("delete", "delete");
-		operations.put("increment", "patch");
+    public OpenApiBuilder(DatabaseReflection reflection, OpenApiDefinition base)
+    {
+        operations = new LinkedHashMap<>();
+        operations.put("list", "getTable");
+        operations.put("create", "post");
+        operations.put("read", "getTable");
+        operations.put("update", "put");
+        operations.put("delete", "delete");
+        operations.put("increment", "patch");
         types = new LinkedHashMap<>();
         types.put("integer",createType("integer","int32"));
         types.put("bigint",createType("integer","int64"));
@@ -52,60 +52,50 @@ public class OpenApiBuilder {
         types.put("geometry",createType("string",null));
         types.put("boolean",createType("boolean",null));
         this.reflection = reflection;
-		openapi = new OpenApiDefinition(base);
-	}
+        openapi = new OpenApiDefinition(base);
+    }
 
-	public OpenApiDefinition build()
-	{
-		openapi.set("openapi", "3.0.0");
-		Set<String> tableNames = reflection.getTableNames();
-		for (String tableName: tableNames) {
-		    setPath(tableName);
-	    }
-		openapi.set("components|responses|pk_integer|description", "inserted primary key value (integer)");
-		openapi.set("components|responses|pk_integer|content|application/json|schema|type", "integer");
-		openapi.set("components|responses|pk_integer|content|application/json|schema|format", "int64");
-		openapi.set("components|responses|pk_string|description", "inserted primary key value (string)");
-		openapi.set("components|responses|pk_string|content|application/json|schema|type", "string");
-		openapi.set("components|responses|pk_string|content|application/json|schema|format", "uuid");
-		openapi.set("components|responses|rows_affected|description", "number of rows affected (integer)");
-		openapi.set("components|responses|rows_affected|content|application/json|schema|type", "integer");
-		openapi.set("components|responses|rows_affected|content|application/json|schema|format", "int64");
+    public OpenApiDefinition build()
+    {
+        openapi.set("openapi", "3.0.0");
+        Set<String> tableNames = reflection.getTableNames();
+        for (String tableName: tableNames) {
+            setPath(tableName);
+        }
+        openapi.set("components|responses|pk_integer|description", "inserted primary key value (integer)");
+        openapi.set("components|responses|pk_integer|content|application/json|schema|type", "integer");
+        openapi.set("components|responses|pk_integer|content|application/json|schema|format", "int64");
+        openapi.set("components|responses|pk_string|description", "inserted primary key value (string)");
+        openapi.set("components|responses|pk_string|content|application/json|schema|type", "string");
+        openapi.set("components|responses|pk_string|content|application/json|schema|format", "uuid");
+        openapi.set("components|responses|rows_affected|description", "number of rows affected (integer)");
+        openapi.set("components|responses|rows_affected|content|application/json|schema|type", "integer");
+        openapi.set("components|responses|rows_affected|content|application/json|schema|format", "int64");
         for (String tableName: tableNames) {
             setComponentSchema(tableName);
             setComponentResponse(tableName);
             setComponentRequestBody(tableName);
         }
-		setComponentParameters();
+        setComponentParameters();
         int i=0;
         for (String tableName: tableNames) {
-			setTag(i, tableName);
-    		i++;
-	    }
-		return openapi;
-	}
+            setTag(i, tableName);
+            i++;
+        }
+        return openapi;
+    }
 
-	private boolean isOperationOnTableAllowed(String operation, String tableName)
-	{
-		/*tableHandler = VariableStore.getTable("authorization.tableHandler");
-		if (tableHandler) {
-			return true;
-		}
-		return (bool) call_user_func($tableHandler, $operation, $tableName);*/
-		return true;
-	}
-
-	private boolean isOperationOnColumnAllowed(String operation, String tableName, String columnName)
-	{
-		/*$columnHandler = VariableStore::getTable("authorization.columnHandler");
-		if (!$columnHandler) {
-			return true;
-		}
-		return (bool) call_user_func($columnHandler, $operation, $tableName, $columnName);*/
+    private boolean isOperationOnTableAllowed(String operation, String tableName)
+    {
         return true;
-	}
+    }
 
-	private String urlencode(String str){
+    private boolean isOperationOnColumnAllowed(String operation, String tableName, String columnName)
+    {
+        return true;
+    }
+
+    private String urlencode(String str){
         try {
             return URLEncoder.encode(str, "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -113,15 +103,15 @@ public class OpenApiBuilder {
         }
     }
 
-	private void setPath(String tableName)
-	{
-		ReflectedTable table = reflection.getTable(tableName);
-		String type = table.getType();
-		Field<?> pk = table.getPk();
-		String pkName = pk!=null ? pk.getName() : null;
-		String path;
-		for (String operation : operations.keySet()) {
-		    String method = operations.get(operation);
+    private void setPath(String tableName)
+    {
+        ReflectedTable table = reflection.getTable(tableName);
+        String type = table.getType();
+        Field<?> pk = table.getPk();
+        String pkName = pk!=null ? pk.getName() : null;
+        String path;
+        for (String operation : operations.keySet()) {
+            String method = operations.get(operation);
             if (pkName==null && !operation.equals("list")) {
                 continue;
             }
@@ -163,9 +153,9 @@ public class OpenApiBuilder {
                     break;
             }
         }
-	}
+    }
 
-	private void setComponentSchema(String tableName) {
+    private void setComponentSchema(String tableName) {
         ReflectedTable table = reflection.getTable(tableName);
         String type = table.getType();
         Field<?> pk = table.getPk();
@@ -213,8 +203,8 @@ public class OpenApiBuilder {
         }
     }
 
-	private void setComponentResponse(String tableName)
-	{
+    private void setComponentResponse(String tableName)
+    {
         ReflectedTable table = reflection.getTable(tableName);
         String type = table.getType();
         Field<?> pk = table.getPk();
@@ -236,37 +226,37 @@ public class OpenApiBuilder {
             }
             openapi.set(String.format("components|responses|%s-%s|content|application/json|schema|\\$ref",operation,tableName), String.format("#/components/schemas/%s-%s",operation,urlencode(tableName)));
         }
-	}
+    }
 
-	private void setComponentRequestBody(String tableName)
-	{
+    private void setComponentRequestBody(String tableName)
+    {
         ReflectedTable table = reflection.getTable(tableName);
         String type = table.getType();
         Field<?> pk = table.getPk();
         String pkName = pk != null ? pk.getName() : null;
         if (pkName!=null && type.equals("table")) {
             for (String operation : new String[]{"create", "update", "increment"}) {
-				if (!isOperationOnTableAllowed(operation, tableName)) {
-					continue;
-				}
-				openapi.set(String.format("components|requestBodies|%s-%s|description",operation,tableName), String.format("single %s record",tableName));
-				openapi.set(String.format("components|requestBodies|%s-%s|content|application/json|schema|\\$ref",operation,tableName), String.format("#/components/schemas/%s-%s",operation,urlencode(tableName)));
-			}
-		}
-	}
+                if (!isOperationOnTableAllowed(operation, tableName)) {
+                    continue;
+                }
+                openapi.set(String.format("components|requestBodies|%s-%s|description",operation,tableName), String.format("single %s record",tableName));
+                openapi.set(String.format("components|requestBodies|%s-%s|content|application/json|schema|\\$ref",operation,tableName), String.format("#/components/schemas/%s-%s",operation,urlencode(tableName)));
+            }
+        }
+    }
 
-	private void setComponentParameters()
-	{
-		openapi.set("components|parameters|pk|name", "id");
-		openapi.set("components|parameters|pk|in", "path");
-		openapi.set("components|parameters|pk|schema|type", "string");
-		openapi.set("components|parameters|pk|description", "primary key value");
-		openapi.set("components|parameters|pk|required", true);
-	}
+    private void setComponentParameters()
+    {
+        openapi.set("components|parameters|pk|name", "id");
+        openapi.set("components|parameters|pk|in", "path");
+        openapi.set("components|parameters|pk|schema|type", "string");
+        openapi.set("components|parameters|pk|description", "primary key value");
+        openapi.set("components|parameters|pk|required", true);
+    }
 
-	private void setTag(int index, String tableName)
-	{
-		openapi.set(String.format("tags|%d|name",index), tableName);
-		openapi.set(String.format("tags|%d|description",index), String.format("%s operations",tableName));
-	}
+    private void setTag(int index, String tableName)
+    {
+        openapi.set(String.format("tags|%d|name",index), tableName);
+        openapi.set(String.format("tags|%d|description",index), String.format("%s operations",tableName));
+    }
 }
